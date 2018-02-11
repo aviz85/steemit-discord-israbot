@@ -5,7 +5,9 @@ const config = require('./config.json');
 const client = new Discord.Client();
 const Promise = require('promise');
 
+var voteWeight = config.defaultVoteWeight;
 
+var admins = config.admins;
 client.on('ready', () => {
     console.log('I am ready!');
 });
@@ -14,10 +16,26 @@ client.on('message', m => {
     if (m.author.bot) return;
     if (m.content.slice(0, 1) === '!' && m.channel.name == 'bot-channel') {
         var text = m.content.substring(1);
-        switch (text.split(' ')[0]) {
+	var words = text.split(' ');
+        switch (words[0]) {
             case 'ping':
                 m.reply('pong!');
                 break;
+            case 'set':
+	        if(admins.indexOf(m.author.username)> -1){
+		  var command = text.substring(4);
+		  if (words[1] == 'weight'){
+		    if (parseInt(words[2])){
+		      voteWeight = parseInt(words[2]);
+		      m.reply ('vote weight: '+voteWeight+'%');
+		   }
+		  else m.reply('error: not numeric value')
+		}
+		}
+		else {
+		  m.reply('I\'m not accepting such orders from you!');
+		}
+		break;
             case 'upvote':
                 console.log('upvote requested');
                 var url = text.substring(7);

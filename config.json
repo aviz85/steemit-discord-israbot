@@ -1,3 +1,4 @@
 {
-	"defaultVoteWeight": 50
+	"defaultVoteWeight": 50,
+	"admins" : ["aviz85","techslut"]
 }
