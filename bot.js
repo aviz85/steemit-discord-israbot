@@ -58,11 +58,11 @@ client.on('message', m => {
                             var created = new Date(result.content[author + '/' + permlink].created);
                             var now = new Date();
                             var postAge = now - created;
-                            if ((postAge > 1000 * 60 * 15) && (postAge < 1000 * 3600 * 24 * 3)) {
+			    if (postAge < 1000 * 60 * 15 ) { throw 'your post is '+(postAge / 1000 / 60)+' minutes old. It\'s too young for me...' }
+			    else if (postAge > 1000 * 3600 * 24 * 3){ throw 'your post is '+(Math.floor(postAge / 1000 / 3600 / 24))+' days old. It\'s too old for me...'} 
+                            else {
                                 return (path);
-                            } else {
-                                throw 'post age is too young or too old to get an upvote';
-                            }
+			    }
                         } else {
                             throw 'post path not valid';
                         }
