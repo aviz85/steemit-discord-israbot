@@ -81,11 +81,11 @@ client.on('message', m => {
                         }
                     })
                     .then(function(result) {
-                        bot.reply('upvoted! ' + url);
+                        m.reply('upvoted! ' + url);
                     })
                     .catch(function(err) {
                         console.error(err);
-                        bot.reply('error upvoting to: ' + url);
+                        m.reply('error: '+err);
                     });
                 break;
         }
