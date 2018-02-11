@@ -42,20 +42,19 @@ client.on('message', m => {
                 console.log(url);
                 var author, permlink, path;
                 var urlSplitted = url.split('/');
-                if (urlSplitted.length == 6) {
-                    author = urlSplitted[4].substring(1);
-                    permlink = urlSplitted[5];
-                    path = urlSplitted.slice(3, 6).join('/');
+                if (urlSplitted.length >= 4) {
+                    author = urlSplitted[urlSplitted.length-2].substring(1);
+                    permlink = urlSplitted[urlSplitted.length-1];
                 }
                 new Promise(function(resolve, reject) {
-                        steem.api.getState(path, function(err, result) {
+                        steem.api.getContent(author, permlink, function(err, result) {
                             if (err !== null) return reject(err);
                             resolve(result);
                         })
                     })
                     .then(function(result) {
-                        if (result.content) {
-                            var created = new Date(result.content[author + '/' + permlink].created);
+                        if (result.created) {
+                            var created = new Date(result.created);
                             var now = new Date();
                             var postAge = now - created;
 			    if (postAge < 1000 * 60 * 15 ) { throw 'your post is '+(postAge / 1000 / 60)+' minutes old. It\'s too young for me...' }
@@ -79,11 +78,11 @@ client.on('message', m => {
                         var vp = result.accounts[auth.steemBotAccount].voting_power;
                         console.log('vote power: ' + vp);
                         if (vp >= 2000) {
-                            return path;
+                            return;
                         } else {
                             throw 'out of voting power';
                         }
-                    }).then(function(path) {
+                    }).then(function() {
                         var voter = auth.steemBotAccount;
                         var wif = auth.postingKey;
                         var weight = config.defaultVoteWeight * 100;
@@ -104,8 +103,14 @@ client.on('message', m => {
                         m.reply('upvoted! ' + url);
                     })
                     .catch(function(err) {
-                        console.error(err);
-                        m.reply('error: '+err);
+			if(err.data.code==10){
+				console.log('error: voted already');
+				m.reply('error: I already voted on that!');
+			}
+			else {
+        	                console.error(err);
+	                        m.reply('error: '+err);
+			}
                     });
                 break;
         }
