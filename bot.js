@@ -27,7 +27,14 @@ client.on('message', m => {
 		  if (words[1] == 'weight'){
 		    if (parseInt(words[2])){
 		      voteWeight = parseInt(words[2]);
-		      m.reply ('vote weight: '+voteWeight+'%');
+			var reply ;
+		      if(voteWeight == 100) {
+			reply = 'Did you just call me fat??';
+			}
+			else {
+			reply = 'vote weight: '+voteWeight+'%';
+			}
+		      m.reply (reply);
 		   }
 		  else m.reply('error: not numeric value')
 		}
