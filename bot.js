@@ -1,8 +1,10 @@
 const Discord = require('discord.js');
 const steem = require('steem');
 const auth = require('./auth.json');
+const config = require('./config.json');
 const client = new Discord.Client();
 const Promise = require('promise');
+
 
 client.on('ready', () => {
     console.log('I am ready!');
@@ -66,7 +68,7 @@ client.on('message', m => {
                     }).then(function(path) {
                         var voter = auth.steemBotAccount;
                         var wif = auth.postingKey;
-                        var weight = 100 * 100;
+                        var weight = config.defaultVoteWeight * 100;
                         console.log('upvoting: ' + url);
                         if (author && permlink && voter && wif && weight) {
                             return new Promise(function(resolve, reject) {
