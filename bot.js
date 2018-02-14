@@ -64,10 +64,14 @@ client.on('message', m => {
                             var created = new Date(result.created);
                             var now = new Date();
                             var postAge = now - created;
-			    if (postAge < 1000 * 60 * 15 ) { throw 'your post is '+(postAge / 1000 / 60)+' minutes old. It\'s too young for me...' }
-			    else if (postAge > 1000 * 3600 * 24 * 3){ throw 'your post is '+(Math.floor(postAge / 1000 / 3600 / 24))+' days old. It\'s too old for me...'} 
+			    if (postAge < 1000 * 60 * 30 ) { 
+				throw 'your post is '+(Math.floor(postAge / 1000 / 60))+' minutes old. It\'s too young for me...'; 
+			    }
+			    else if (postAge > 1000 * 3600 * 24 * 3){ 
+				throw 'your post is '+(Math.floor(postAge / 1000 / 3600 / 24))+' days old. It\'s too old for me...';
+			    } 
                             else {
-                                return (path);
+                                return path;
 			    }
                         } else {
                             throw 'post path not valid';
@@ -110,13 +114,14 @@ client.on('message', m => {
                         m.reply('upvoted! ' + url);
                     })
                     .catch(function(err) {
-			if(err.data.code==10){
-				console.log('error: voted already');
-				m.reply('error: I already voted on that!');
+			console.log(err);
+			if(typeof err === 'string'){
+				console.error(err);
+				m.reply('error: '+err);
 			}
-			else {
-        	                console.error(err);
-	                        m.reply('error: '+err);
+			else if(err.data.code==10){
+				console.error('error: voted already');
+				m.reply('error: I already voted on that!');
 			}
                     });
                 break;
