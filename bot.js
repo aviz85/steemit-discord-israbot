@@ -21,6 +21,14 @@ client.on('message', m => {
             case 'ping':
                 m.reply('pong!');
                 break;
+	    case 'sababa':
+		if (Math.floor(Math.random()*4) === 3){ 
+                  m.reply('Ein beaya ach/achot sheli!');
+		}
+		else {
+		  m.reply('No problem, mate!');
+		}
+		break;
             case 'set':
 	        if(admins.indexOf(m.author.username)> -1){
 		  var command = text.substring(4);
@@ -65,7 +73,7 @@ client.on('message', m => {
                             var now = new Date();
                             var postAge = now - created;
 			    if (postAge < 1000 * 60 * 30 ) { 
-				throw 'your post is '+(Math.floor(postAge / 1000 / 60))+' minutes old. It\'s too young for me...'; 
+				throw 'your post is '+(Math.floor(postAge / 1000 / 60))+' minutes old. It\'s too young for me... Wait till it\'s 30 minutes old.'; 
 			    }
 			    else if (postAge > 1000 * 3600 * 24 * 3){ 
 				throw 'your post is '+(Math.floor(postAge / 1000 / 3600 / 24))+' days old. It\'s too old for me...';
