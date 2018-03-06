@@ -4,17 +4,24 @@ const auth = require('./auth.json');
 const config = require('./config.json');
 const client = new Discord.Client();
 const Promise = require('promise');
+const moment = require('moment');
+const botChannelID = config.botChannelID;
 
 var voteWeight = config.defaultVoteWeight;
-
+var cooldown = config.defaultCooldown;
 var admins = config.admins;
+
 client.on('ready', () => {
     console.log('I am ready!');
+    client.channels.get(botChannelID).send('Oh, I feel reborn!');
 });
+
+
+var disabledUsers = {};
 
 client.on('message', m => {
     if (m.author.bot) return;
-    if (m.content.slice(0, 1) === '!' && m.channel.name == 'bot-channel') {
+    if (m.content.slice(0, 1) === '!' && m.channel.id == botChannelID) {
         var text = m.content.substring(1);
 	var words = text.split(' ');
         switch (words[0]) {
@@ -29,12 +36,28 @@ client.on('message', m => {
 		  m.reply('No problem, mate!');
 		}
 		break;
+	    case 'get':
+		if(words.length === 1){
+			var c = {
+				voteWeight: voteWeight, cooldown: cooldown, admins: admins 
+			}
+			m.author.sendMessage(JSON.stringify(c));
+		}
+	        if(admins.indexOf(m.author.username)> -1){
+			if(words[1] == 'disabledUsers'){
+				m.author.sendMessage(JSON.stringify(disabledUsers));
+			}
+		
+		}else {
+			m.reply('I\'m not accepting such orders from you!');
+		}
+		break;		
             case 'set':
 	        if(admins.indexOf(m.author.username)> -1){
 		  var command = text.substring(4);
 		  if (words[1] == 'weight'){
-		    if (parseInt(words[2])){
-		      voteWeight = parseInt(words[2]);
+		    if (!isNaN(words[2])){
+		      voteWeight = parseFloat(words[2]);
 			var reply ;
 		      if(voteWeight == 100) {
 			reply = 'Did you just call me fat??';
@@ -45,6 +68,22 @@ client.on('message', m => {
 		      m.reply (reply);
 		   }
 		  else m.reply('error: not numeric value')
+		 }
+		 if(words[1] == 'enable'){
+		  if(disabledUsers[words[2]]) {
+			delete disabledUsers[words[2]];
+			m.reply(words[2]+' can ask for upvotes now!');
+		  }
+		else {
+			m.reply(words[2]+' isn\'t in my ignore list.');
+		  }
+		 }
+		if(words[1] == 'cooldown'){
+		  if(!isNaN(words[2])){
+		    cooldown = parseFloat(words[2]);
+			m.reply('cooldown (hours): '+cooldown);
+		  }
+		  else m.reply('error: not numberic value');
 		}
 		}
 		else {
@@ -53,6 +92,11 @@ client.on('message', m => {
 		break;
             case 'upvote':
                 console.log('upvote requested');
+		var last;
+		if(last = disabledUsers[m.author.username]){
+			m.reply('You can ask for an upvote only once per 24 hours. Last time was '+moment(last).utcOffset(2).format('HH:mm')+'.');
+			break;		
+		}
                 var url = text.substring(7);
                 console.log(url);
                 var author, permlink, path;
@@ -61,6 +105,10 @@ client.on('message', m => {
                     author = urlSplitted[urlSplitted.length-2].substring(1);
                     permlink = urlSplitted[urlSplitted.length-1];
                 }
+		else { 
+			m.reply('Invalid post url');
+			break;
+		}
                 new Promise(function(resolve, reject) {
                         steem.api.getContent(author, permlink, function(err, result) {
                             if (err !== null) return reject(err);
@@ -120,6 +168,8 @@ client.on('message', m => {
                     })
                     .then(function(result) {
                         m.reply('upvoted! ' + url);
+			disabledUsers[m.author.username] = new Date();
+			setTimeout(function(a){return function(){delete disabledUsers[a]}}(m.author.username), 1000 * 3600 * 24);
                     })
                     .catch(function(err) {
 			console.log(err);

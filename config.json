@@ -1,4 +1,6 @@
 {
 	"defaultVoteWeight": 50,
-	"admins" : ["aviz85","techslut"]
+	"defaultCooldown": 22,
+	"botChannelID" : "410834100341964801",
+	"admins" : ["aviz85","techslut","Thunder_God"]
 }
